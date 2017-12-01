@@ -1,0 +1,478 @@
+package pecl; 
+
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.*;
+
+parser code  
+{:
+public static void main (String argc[]) throws Exception{
+   String extension="";
+   String programa=argc[0]; 
+   
+   for (int i=programa.length()-5;i<programa.length();i++){
+   		extension=extension+programa.charAt(i);
+   }
+  if(extension.equals(".prog")){
+     	FileInputStream prog=new FileInputStream(programa);
+     	Yylex y=new Yylex(prog);
+   		PeclCup principal=new PeclCup(y);
+   		principal.parse();
+   		System.out.println("ANALIZADOR LEXICO");
+   		System.out.println(y.imprimir());
+   		System.out.println("\nNumero de errorres lexicos: "+ y.getErr()+"\n");
+   		
+  }
+  else{
+  	System.err.println("ERROR. EL ARCHIVO DEBE DE SER .prog");
+  }
+}  
+public void syntax_error(Symbol s) {
+  System.err.println("Error de sintaxis linea " +(s.left+1)+" en o cerca de "+s.value);
+ 
+ 
+}  
+public void report_fatal_error(String message, Object info) {
+  done_parsing();
+  report_error("Error de sintaxis fatal : "
+  + "No se puede recuperar del error y continuar con el analisis - "
+  + message + " ",(Symbol)info);
+  report_error("** Final del analisis.", null);
+  System.exit(1);
+}
+  
+:}	
+  
+action code
+{:
+Hashtable<String,Simbolo> tSimbolos=new Hashtable<String, Simbolo>();
+ArrayList<String> lvariables = new ArrayList<String>();
+Arbol a;
+Nodo aux;
+Nodo aux1;
+Nodo aux2;
+Nodo aux3;
+Nodo aux4;
+Nodo raiz;
+boolean ifwhile;
+StringBuffer sif =new StringBuffer();
+StringBuffer sfin =new StringBuffer();
+int numErr=0;
+int numErrS=0;
+String tipo;
+
+public void añadeHojaDecl (){
+for (int i=0;i<lvariables.size();i++){
+	aux.añadirHijo(new NodoHoja(lvariables.get(i),""));
+
+	}
+}
+
+public String impTDS(){
+String s="";
+s+="NOMBRE\t\tTIPO\t\tINICIALIZADO\n";
+Enumeration e=tSimbolos.keys();
+	while(e.hasMoreElements()){
+	String c= e.nextElement().toString();
+	Simbolo sim=tSimbolos.get(c);
+	if(sim.getTipo().equals("undefined")){
+	s+=c+"\t\t"+sim.getTipo()+"\t"+sim.getValor()+"\n";
+	}
+	else{
+	s+=c+"\t\t"+sim.getTipo()+"\t\t"+sim.getValor()+"\n";
+	}
+	}
+
+return s;
+}
+
+public void añadeExpresion()  {
+if (ifwhile){
+	aux.añadirHijo(aux1);
+
+}
+else{
+	raiz.añadirHijo(aux1);
+}
+
+}
+public boolean estaTabla(String s){
+if (tSimbolos.containsKey(s)) return true;
+else return false;
+}
+public void compruebaIntBool(Object o, int num){
+	if(!estaTabla(o.toString())) System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta defninida");
+	else if(tSimbolos.get(o.toString()).getTipo().equals("pseudo")){
+	System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+	}
+	else {
+		Simbolo uno= tSimbolos.get(o.toString());
+	    String un =uno.getTipo();		
+		if(!un.equals("boolean") && !un.equals("integer")){
+			System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" debe ser un boolean o integer");
+			numErrS++;
+		}
+		else if(!tSimbolos.get(o.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta inicializada");
+		numErrS++;
+		}
+	
+	}
+
+
+
+}
+public void compruebaBool(Object o, int num){
+	if(!estaTabla(o.toString())) System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta defninida");
+	else if(tSimbolos.get(o.toString()).getTipo().equals("pseudo")){
+	System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+	}
+	else {
+		Simbolo uno= tSimbolos.get(o.toString());
+	    String un =uno.getTipo();		
+		if(un.equals("undefined")){
+			uno.setTipo("boolean");
+		}
+		else if(!tSimbolos.get(o.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta inicializada");
+		numErrS++;
+		}
+		else if(!un.equals("boolean")){
+			System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" debe ser  boolean");
+		}
+	
+	}
+	
+}
+
+public void compruebaInt(Object o, int num){
+	if(!estaTabla(o.toString())) System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta defninida");
+	else if(tSimbolos.get(o.toString()).getTipo().equals("pseudo")){
+	System.err.println("La variable "+o.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+	}
+	else {
+		Simbolo uno= tSimbolos.get(o.toString());
+	    String un =uno.getTipo();		
+		if(un.equals("undefined")){
+			uno.setTipo("integer");
+		}
+		else if(!tSimbolos.get(o.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta inicializada");
+		numErrS++;
+		}
+		else if(!un.equals("integer")){
+			System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" debe ser un entero");
+		}
+	
+	}
+	
+}
+
+public void compruebaIntAsig(Object o, int num){
+	if(!estaTabla(o.toString())) System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" no esta defninida");
+	else if(tSimbolos.get(o.toString()).getTipo().equals("pseudo")){
+	System.err.println("La variable "+o.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+	}
+	else {
+		Simbolo uno= tSimbolos.get(o.toString());
+	    String un =uno.getTipo();		
+		if(un.equals("undefined")){
+			uno.setTipo("integer");
+		}
+		else if(!un.equals("integer")){
+			System.err.println("Error semantico en la linea "+num+". La variable "+o.toString()+" debe ser un entero");
+		}
+	
+	}
+	
+}
+public void compruebaVariable(Object a, Object b, int num){
+if(!estaTabla(a.toString())) System.err.println("La variable "+a.toString()+" no esta defninida");
+else if(tSimbolos.get(a.toString()).getTipo().equals("pseudo")){
+	System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+}
+else if(b.toString()=="integer" || b.toString()=="boolean"){
+
+
+		Simbolo uno= tSimbolos.get(a.toString());
+	    String un =uno.getTipo();		
+		if(!un.equals(b.toString())){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no es compatible con "+b.toString());
+		numErrS++;
+		}
+		else if(!tSimbolos.get(a.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no esta inicializada");
+		numErrS++;
+ 
+ }
+	
+}	
+else{ 	
+	 	if(!estaTabla(b.toString())){ System.err.println("Error semantico en la linea "+num+". La variable "+b+" no esta defninida");
+	 	numErr++;
+		}
+		else{ 
+		Simbolo uno= tSimbolos.get(a.toString());
+		Simbolo dos= tSimbolos.get(b.toString());
+		String un =uno.getTipo();
+		String dop =dos.getTipo();
+		if(un.equals("undefined")){
+			uno.setTipo(dop);
+		}
+		else if(!un.equals(dop)){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no es compatible con "+b.toString());
+		numErrS++;
+		}
+		else{ if(!tSimbolos.get(a.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no esta inicializada");
+		numErrS++;
+		}
+		if(!tSimbolos.get(b.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+b.toString()+" no esta inicializada");
+		numErrS++;
+        	}
+    	} 
+       }	   
+	}    
+}
+
+public void compruebaVariableAsig(Object a, Object b, int num){
+if(!estaTabla(a.toString())) System.err.println("La variable "+a.toString()+" no esta defninida");
+else if(tSimbolos.get(a.toString()).getTipo().equals("pseudo")){
+	System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" es el nombre del programa, no puede ser usado como variable");
+	numErrS++;
+	
+}
+else if(b.toString()=="integer" || b.toString()=="boolean"){
+
+
+		Simbolo uno= tSimbolos.get(a.toString());
+	    String un =uno.getTipo();	
+	    if(un.equals("undefined")){
+			uno.setTipo(b.toString());
+			uno.inicializar();
+		}	
+		else if(!un.equals(b.toString())){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no es compatible con "+b.toString());
+		numErrS++;
+		}
+		else{
+		uno.inicializar();
+		}
+ 
+ }
+	
+	
+else{ 	
+	 	if(!estaTabla(b.toString())){ System.err.println("Error semantico en la linea "+num+". La variable "+b+" no esta defninida");
+	 	numErrS++;
+		}
+		else{
+		Simbolo uno= tSimbolos.get(a.toString());
+		Simbolo dos= tSimbolos.get(b.toString());
+		String un =uno.getTipo();
+		String dop =dos.getTipo();
+		if(un.equals("undefined")){
+			uno.setTipo(dop);
+			if(dop.equals("undefined")){
+			System.err.println("Error semantico en la linea "+num+". La variable "+b.toString()+" no esta definido");
+			numErrS++;
+			}
+			else if(!dos.getValor()){
+			System.err.println("Error semantico en la linea "+num+". La variable "+b.toString()+" no esta inicializada");
+			}
+			else{
+			uno.inicializar();
+			}
+		
+		}
+		else if(!un.equals(dop)){
+		System.err.println("Error semantico en la linea "+num+". La variable "+a.toString()+" no es compatible con "+b.toString());
+		numErrS++;
+		}
+		else if(!tSimbolos.get(b.toString()).getValor()){
+		System.err.println("Error semantico en la linea "+num+". La variable "+b.toString()+" no esta inicializada");
+		numErrS++;
+		}
+		else{
+		
+		uno.inicializar();
+		}
+		}
+        
+    }    
+	    
+}
+
+
+public void añadirArray(String a, int b){
+	if(lvariables.contains(a)){
+		System.err.println("Error semantico en linea "+b+ ". El caracter "+a+" ya esta definido");
+		numErrS++;
+	}
+	else{
+	lvariables.add(a);	
+	}
+}
+public void añadirVariables( Object b, int a){
+
+ while (!lvariables.isEmpty()){
+ 			if(estaTabla(lvariables.get(0))){
+ 			 System.err.println("Error semantico en linea "+a+ ". El caracter "+lvariables.get(0)+" ya esta definido");
+ 			 numErrS++;
+ 			 lvariables.remove(0);
+ 			 }
+ 			
+ 			else{
+            tSimbolos.put(lvariables.get(0), new Simbolo(b.toString()));
+            lvariables.remove(0);
+            }
+        }
+
+
+}
+
+public void añadirVariablesUnd(int a){
+
+ while (!lvariables.isEmpty()){
+ 			if(estaTabla(lvariables.get(0))){
+ 			 System.err.println("Error semantico en linea "+a+ ". El caracter "+lvariables.get(0)+" ya esta definido");
+ 			 numErrS++;
+ 			 lvariables.remove(0);
+ 			 }
+ 			
+ 			else{
+            tSimbolos.put(lvariables.get(0), new Simbolo("undefined"));
+            lvariables.remove(0);
+            }
+        }
+
+
+}
+
+public void inicializar(Object o){
+	tSimbolos.get(o.toString()).inicializar();
+}
+public void meterSimbolo(String s, Simbolo sim){
+tSimbolos.put(s, sim);
+}
+
+public void fin(){
+	sfin.append("\n....ANALISIS FINALIZADO .....\n");
+	sfin.append("Numero de errores sintacticos: "+numErr+"\n");
+	sfin.append("Numero de errores semanticos: "+numErrS+"\n");
+	
+	if(numErr==0 && numErrS==0){
+		sfin.append("TABLA DE SIMBOLOS: \n");
+		sfin.append(impTDS()); sfin.append("\n");
+		sfin.append("ARBOL SINTACTICO: \n");
+		sfin.append(a.imprimir());
+	}
+	System.out.println(sfin.toString());
+}
+
+:}
+terminal String PROGRAM, IS, BEGIN, END, VAR, INTEGER, BOOLEAN, READ, WRITE, SKIP, WHILE, DO, IF, THEN, ELSE, AND, OR, TRUE, FALSE, NOT; 
+terminal String	ASIGNACION, MENOR_IGUAL, MENOR, IGUAL, MAYOR, MAYOR_IGUAL, DISTINTO;
+terminal String SUMA, RESTA, DIVISION, MULTIPLICACION, PARENT_IZQ, PARENT_DER, COMA, DOS_PUNTOS, PUNTO_COMA;
+terminal String IDE;
+terminal  NUM;
+
+non terminal	inicio, programa, variables, variable, var, expresion, enum, sentencias, asignacion, tipo, tipoBool, comp, comparacion, mas, otra;
+non terminal    logica, exLogicas, tLogica, if, else, while, operacion, operaciones, operando, operador, conSigno, numero, parentExLogica, operadorParent;
+non terminal    skip, write, read, opcion, opcion2, expresion2, nombreProg;
+precedence right OR;
+precedence right AND;
+precedence right NOT;
+precedence right MENOR_IGUAL, MENOR, IGUAL, MAYOR, MAYOR_IGUAL, DISTINTO;
+precedence right SUMA, RESTA;
+precedence right DIVISION, MULTIPLICACION;
+
+
+
+//gramatica 
+start with inicio;
+inicio          ::=PROGRAM nombreProg IS variables programa {: fin(); :};
+nombreProg      ::=IDE:NOMBRE		{: tSimbolos.put(NOMBRE.toString(), new Simbolo("pseudo")); raiz = new NodoRaiz();  a= new Arbol(raiz);:}		;										
+
+variables       ::=variables variable  {:aux1=new NodoIntermedio("Decl"); aux1.añadirHijo(aux); raiz.añadirHijo(aux1); :}| ; 
+variable        ::=VAR enum DOS_PUNTOS var:variable PUNTO_COMA {:aux = new NodoIntermedio(variable.toString());  añadeHojaDecl();  añadirVariables(variable, variableleft+1);:}
+				 | VAR:e enum PUNTO_COMA  {:aux = new NodoIntermedio("undefined"); añadeHojaDecl(); añadirVariablesUnd(eleft+1);  :}
+				 | error {:numErr++;:};
+enum            ::=IDE:ID {:añadirArray(ID.toString(),IDleft+1); :}
+                 | enum COMA IDE:ID {:añadirArray(ID.toString(),IDleft+1);:}
+                 | error  {:numErr++;:};
+var             ::=INTEGER:inte {:RESULT=inte.toString();:} 
+                 | BOOLEAN:boole{:RESULT=boole.toString();:}; 
+programa		::=BEGIN sentencias END  ;
+sentencias      ::=expresion mas | ;	 	
+mas             ::=PUNTO_COMA expresion mas | ;
+expresion       ::=  operacion{: aux1=new NodoIntermedio("Operation"); aux1.añadirHijo(aux); añadeExpresion();:}
+				   | asignacion {: aux1=new NodoIntermedio("Asign"); aux1.añadirHijo(aux); añadeExpresion();:}
+				   | if {: aux1=new NodoIntermedio("if"); aux1.añadirHijo(aux); añadeExpresion();:}
+				   | while {: aux1=new NodoIntermedio("while"); aux1.añadirHijo(aux); añadeExpresion();:}
+				   | expresion2 ;
+asignacion      ::= IDE:id ASIGNACION  tipo:tip {:compruebaVariableAsig(id, tip, tipleft+1); aux = new NodoIntermedio(id.toString()); aux.añadirHijo(aux3);  :}
+                  | error tipo{:numErr++;:};
+tipo            ::= IDE:id{: RESULT=id; aux3= new NodoHoja("IDE",id.toString());:} 
+                  | numero:n {:RESULT="integer"; aux3= new NodoHoja("NUM",n.toString()); :}
+                  | tipoBool:tb {:RESULT="boolean"; aux3= new NodoHoja("BOOL",tb.toString());:};
+tipoBool        ::= TRUE{:RESULT="TRUE"; :} 
+				  | FALSE{:RESULT="FALSE"; :} 
+				  | NOT PARENT_IZQ logica PARENT_DER {:RESULT="NEGADA";:}  ; 
+comparacion     ::= IDE:id comp:c IDE:id2 {:compruebaVariable(id, id2, idleft+1); sif.append(id.toString()); sif.append(c.toString()); sif.append(id2.toString());:}  
+                  | IDE:id comp:c numero:n  {:compruebaVariable(id,"integer", idleft+1);sif.append(id.toString()); sif.append(c); sif.append(n.toString());:}
+                  | IDE:id IGUAL tipoBool:tb {:compruebaVariable(id,"boolean", idleft+1); sif.append(id.toString()); sif.append(" igual "); sif.append(tb);:} 
+                  | error{:numErr++;:}; 
+comp            ::= MENOR_IGUAL {:RESULT=" menor_igual ";:}
+                  | MENOR {:RESULT=" menor ";:}
+                  | IGUAL {:RESULT=" igual ";:}
+                  | MAYOR {:RESULT=" mayor ";:}
+                  | MAYOR_IGUAL {:RESULT=" mayor_igual ";:}
+                  | DISTINTO{:RESULT=" distinto ";:};
+logica          ::= IDE:id {:compruebaBool(id, idleft+1); sif.append(id.toString()); :}
+                  | comparacion;
+exLogicas       ::= logica {:aux4=new NodoHoja("Log",sif.toString());  :}
+                  | NOT PARENT_IZQ exLogicas PARENT_DER {:sif.append("Neg");  :}
+                  | exLogicas tLogica otra ;
+otra            ::= exLogicas;
+tLogica         ::= AND {:sif.append(" and ");:}
+				  | OR{:sif.append(" or ");:};
+parentExLogica  ::= exLogicas 
+                  | PARENT_IZQ exLogicas PARENT_DER;
+if              ::= IF parentExLogica THEN sentencias END IF {:aux=new NodoIntermedio("IF"); aux.añadirHijo(aux4);  :}
+				  | IF parentExLogica THEN else ELSE sentencias END IF {:aux=new NodoIntermedio("IF-ELSE"); aux.añadirHijo(aux4); :};
+else            ::= sentencias;  
+while           ::= WHILE parentExLogica DO sentencias END WHILE  {:aux=new NodoIntermedio("IF"); aux.añadirHijo(aux4); ifwhile=false; :};
+operacion       ::= IDE:id ASIGNACION:as opcion:o {: compruebaIntAsig(id, idleft+1); inicializar(id); aux = new NodoIntermedio(id.toString()); aux.añadirHijo(aux3); :}
+                  | error opcion   ;
+opcion          ::= operaciones {:aux3=new NodoIntermedio("NO_PARENT"); aux3.añadirHijo(aux2); :}
+                  | PARENT_IZQ operaciones PARENT_DER {:aux3=new NodoIntermedio("PARENT"); aux3.añadirHijo(aux2); :};
+operaciones     ::= operador:o operando:op operadorParent:opa opcion2:o2 {:aux2 = new NodoHoja("op",o+""+op+""+opa+""+o2);String s=o+""+op+""+opa+""+o2; RESULT=s;:}
+				  | operando:o1 operador:o operando:o2 operadorParent:opa opcion2:op2 {:aux2 = new NodoHoja("op",o1+""+o+""+o2+""+opa+""+o2); String s=o1+""+o+""+o2+""+opa+""+o2; RESULT=s;:}
+				  | error{:numErr++;:};
+opcion2         ::= opcion:o {:RESULT=o;:} | {:RESULT="";:} ;
+operando        ::= IDE:id {:compruebaInt(id, idleft+1); RESULT=id.toString();:}
+                  | numero:n {:RESULT=n.toString();:}   ; 
+operadorParent  ::= operador:o {:RESULT=o;:}
+				   | {:RESULT="";:};
+operador        ::= SUMA {:RESULT="+";:}
+                  | RESTA {:RESULT="-";:}
+                  | DIVISION {:RESULT="/";:}
+                  | MULTIPLICACION {:RESULT="*";:};
+conSigno        ::= SUMA NUM:n {:RESULT="+"+n.toString();:}| RESTA NUM:n {:RESULT="-"+n.toString();:};
+numero          ::= conSigno {::} | NUM:n {: RESULT=n;:} ;
+skip            ::= SKIP:id {:aux=new NodoHoja("","");:} ; 
+read            ::= READ IDE:id {:compruebaInt(id, idleft+1);  aux=new NodoHoja("IDE",id.toString()); :} ;
+write           ::= WRITE IDE:id {: compruebaIntBool(id, idleft+1);  aux=new NodoHoja("IDE",id.toString()); :}
+				  | WRITE opcion {:aux=new NodoIntermedio("Operation"); aux.añadirHijo(aux3); :};
+expresion2      ::= skip {: aux1=new NodoIntermedio("skip"); aux1.añadirHijo(aux); añadeExpresion();:} 
+				  | read {: aux1=new NodoIntermedio("read");  aux1.añadirHijo(aux); añadeExpresion();:}
+				  | write{: aux1=new NodoIntermedio("write"); aux1.añadirHijo(aux); añadeExpresion();:}
+				  | error{:numErr++;:} ;
+			

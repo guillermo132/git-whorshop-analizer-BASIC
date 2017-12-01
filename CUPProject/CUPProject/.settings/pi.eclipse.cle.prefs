@@ -1,0 +1,11 @@
+//pecl1.cup/cup-compact-red=false
+//pecl1.cup/cup-debug=false
+//pecl1.cup/cup-expected-conflicts=0
+//pecl1.cup/cup-no-positions=false
+//pecl1.cup/cup-no-scanner=false
+//pecl1.cup/cup-non-terms=false
+//pecl1.cup/cup-output=src
+//pecl1.cup/cup-parser-class=Pecl1
+//pecl1.cup/cup-symbols-class=Pecl1Sym
+//pecl1.cup/cup-symbols-if=true
+eclipse.preferences.version=1

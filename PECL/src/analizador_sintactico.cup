@@ -1,0 +1,87 @@
+
+package PECL1;
+
+import java_cup.runtime.*;
+import java.io.*;
+
+parser code
+{:
+	public static void main (String argc[]) throws Exception{
+	   String extension="";
+	   String programa=argc[0]; 
+	   
+	   for (int i=programa.length()-5;i<programa.length();i++){
+	   		extension=extension+programa.charAt(i);
+	   }
+	  if(extension.equals(".bash")){
+	     	FileInputStream basic =new FileInputStream(programa);
+	     	Yylex y=new Yylex(basic);
+	   		PeclCup principal=new PeclCup(y);
+	   		principal.parse();
+	   		System.out.println("ANALIZADOR LEXICO");
+	   		System.out.println(y.writeOutputFile());
+	   		System.out.println("\nNumero de errorres lexicos: "+ y.getErr()+"\n");
+	   		
+	  }
+	  else{
+	  	System.err.println("ERROR. EL ARCHIVO DEBE DE SER .bash");
+	  }
+	}  
+	public void syntax_error(Symbol s) {
+	  System.err.println("Error de sintaxis linea " +(s.left+1)+" en o cerca de "+s.value);
+	 
+	 
+	}  
+	public void report_fatal_error(String message, Object info) {
+	  done_parsing();
+	  report_error("Error de sintaxis fatal : "
+	  + "No se puede recuperar del error y continuar con el analisis - "
+	  + message + " ",(Symbol)info);
+	  report_error("** Final del analisis.", null);
+	  System.exit(1);
+}
+  
+:}
+
+action code
+{:
+:}
+
+terminal String		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE, READ, 
+					REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, DIVISION, POTENCIA,
+					CONSTANTE, CRLF, CR, LF, PUNTOYCOMA, ENTERO;
+terminal 		 	ID;
+
+non terminal	inicio, programa, variables, variable, var, expresion, enum, sentencias, asignacion, tipo, tipoBool, comp, comparacion, mas, otra;
+non terminal    logica, exLogicas, tLogica, if, for, operacion, operaciones, operando, operador, conSigno, numero, parentExLogica, operadorParent;
+non terminal    skip, write, read, opcion, opcion2, expresion2, nombreProg;
+
+precedence right OR;
+precedence right AND;
+precedence right NOT;
+precedence right MENOR_IGUAL, MENOR, IGUAL, MAYOR, MAYOR_IGUAL, DISTINTO;
+precedence right MAS, MENOS;
+precedence right DIVISION, MUL;
+
+//gramatica
+start with inicio;
+inicio          ::=ENTERO sentencia programa {: fin(); :};
+nombreProg      ::=IDE:NOMBRE		{: tSimbolos.put(NOMBRE.toString(), new Simbolo("pseudo")); raiz = new NodoRaiz();  a= new Arbol(raiz);:}		;										
+
+variables       ::=variables variable  
+					{:
+						aux1=new NodoIntermedio("Decl"); aux1.añadirHijo(aux); raiz.añadirHijo(aux1); 
+					:}
+				| ; 
+variable        ::=VAR enum DOS_PUNTOS var:variable PUNTO_COMA 
+					{:
+						aux = new NodoIntermedio(variable.toString());  añadeHojaDecl();  añadirVariables(variable, variableleft+1);
+					:}
+				 | VAR:e enum PUNTO_COMA  
+				 	{:
+				 		aux = new NodoIntermedio("undefined"); añadeHojaDecl(); añadirVariablesUnd(eleft+1);  
+				 	:}
+				 | error 
+				 	{:
+				 		numErr++;
+				 	:};
