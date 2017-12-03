@@ -26,10 +26,14 @@ import java.util.ArrayList;
 
 %{
 	private static ArrayList<String> tokensList = new ArrayList<String>();
+	int err=0;
+	public int getErr(){
+		return err;
+	}
 	//private static ArrayList<String> errorList = new ArrayList<String>();
 	 
 	/* Método de escribir en el fichero de salida y por pantalla*/
-	private void writeOutputFile() throws IOException {
+	public void writeOutputFile() throws IOException {
 		String filename = "file.out";
 		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
 		System.out.print("[");
@@ -77,7 +81,7 @@ CR	=	\r
 //EOF = "eof"
 CRLF={CR}{LF}
 Numero_Real      =   {Digito}\.{Digito}
-expresion_num  =  (\+|\-)?([0-9]|{Digito}|{Numero_Real}|({Digito}|{Numero_Real})^(\+|\-)?{Digito}) 
+expresion_num  =  (\+|\-)?([0-9]|{Digito}|{Numero_Real}|({Digito}|{Numero_Real})\^(\+|\-)?{Digito}) 
 constante = " "{expresion_num}
 id_numerico ={Letra} "(" {Car_Cadena_Simple}{1,2}")"
 id_cadena = {Letra}"$"
@@ -86,56 +90,67 @@ Identificador = {Digito} | {Letra}
 %state estadoNumero
 
 %%
-"DATA" 				{this.tokensList.add(yytext());}
-"DEF"				{this.tokensList.add(yytext());}
-"DIM"				{this.tokensList.add(yytext());}
-"END"				{this.tokensList.add(yytext());}
-"FOR"				{this.tokensList.add(yytext());}
-"GO"				{this.tokensList.add(yytext());}
-"GOSUB" 			{this.tokensList.add(yytext());}
-"GOTO" 				{this.tokensList.add(yytext());}
-"IF" 				{this.tokensList.add(yytext());}
-"INPUT" 			{this.tokensList.add(yytext());}
-"LET" 				{this.tokensList.add(yytext());}
-"NEXT" 				{this.tokensList.add(yytext());}
-"ON" 				{this.tokensList.add(yytext());}
-"PRINT" 			{this.tokensList.add(yytext());}
-"RANDOMIZE" 		{this.tokensList.add(yytext());}
-"READ" 				{this.tokensList.add(yytext());}
-"REM" 				{this.tokensList.add(yytext());}
-"RESTORE" 			{this.tokensList.add(yytext());}
-"RETURN" 			{this.tokensList.add(yytext());}
-"STEP" 				{this.tokensList.add(yytext());}
-"STOP" 				{this.tokensList.add(yytext());}
-"THEN" 				{this.tokensList.add(yytext());}
-"TO" 				{this.tokensList.add(yytext());}
-"ABS"				{this.tokensList.add(yytext());}
-"ATN"				{this.tokensList.add(yytext());}
-"COS"				{this.tokensList.add(yytext());}
-"EXP"				{this.tokensList.add(yytext());}
-"INT"				{this.tokensList.add(yytext());}
-"LOG"				{this.tokensList.add(yytext());}
-"RND"				{this.tokensList.add(yytext());}
-"SGN"				{this.tokensList.add(yytext());}
-"SQR"				{this.tokensList.add(yytext());}
-"TAN"				{this.tokensList.add(yytext());}
-"="					{this.tokensList.add("igual");}
-"+"					{this.tokensList.add("mas");}
-"-"					{this.tokensList.add("menos");}
-"*"					{this.tokensList.add("mul");}
-{Digito}			{this.tokensList.add("ent(" + yytext() + ")");}
-{id_cadena}			{this.tokensList.add("ide(" + yytext() + ")");}
-{id_numerico}		{this.tokensList.add("ide(" + yytext() + ")");}
-{Identificador} 	{this.tokensList.add("id("+yytext()+")");}
-{Cad_REM} 			{this.tokensList.add("CADENA REM: "+yytext());}
-{Cad_Delimitada}	{this.tokensList.add("const(" + yytext().substring(1,yytext().length()-1) + ")");}
-{CRLF}				{this.tokensList.add("CRLF");}
-{CR}				{this.tokensList.add("CR");}
-{LF}				{this.tokensList.add("LF");}
-{PUNTOYCOMA} 		{this.tokensList.add("PUNTOYCOMA");}
-{constante}			{this.tokensList.add("const(" + yytext().substring(1)+ ")");}
+"DATA" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.DATA,yyline,yycolumn);}
+"DEF"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.DEF,yyline,yycolumn);}
+"DIM"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.DIM,yyline,yycolumn);}
+"END"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.END,yyline,yycolumn);}
+"FOR"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.FOR,yyline,yycolumn);}
+"GO"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.GO,yyline,yycolumn);}
+"GOSUB" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.GOSUB,yyline,yycolumn);}
+"GOTO" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.GOTO,yyline,yycolumn);}
+"IF" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.IF,yyline,yycolumn);}
+"INPUT" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.INPUT,yyline,yycolumn);}
+"LET" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.LET,yyline,yycolumn);}
+"NEXT" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.NEXT,yyline,yycolumn);}
+"ON" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ON,yyline,yycolumn);}
+"PRINT" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.PRINT,yyline,yycolumn);}
+//"RANDOMIZE" 		{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RANDOMIZE,yyline,yycolumn);}
+"READ" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.READ,yyline,yycolumn);}
+"REM" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.REM,yyline,yycolumn);}
+"RESTORE" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RESTORE,yyline,yycolumn);}
+"RETURN" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RETURN,yyline,yycolumn);}
+"STEP" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.STEP,yyline,yycolumn);}
+"STOP" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.STOP,yyline,yycolumn);}
+"THEN" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.THEN,yyline,yycolumn);}
+"TO" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.TO,yyline,yycolumn);}
+"ABS"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ABS,yyline,yycolumn);}
+"ATN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ATN,yyline,yycolumn);} 
+"COS"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.COS,yyline,yycolumn);}
+"EXP"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.EXP,yyline,yycolumn);}
+"INT"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.INT,yyline,yycolumn);}
+"LOG"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.LOG,yyline,yycolumn);}
+"RND"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RND,yyline,yycolumn);}
+"SGN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.SGN,yyline,yycolumn);} 
+"SQR"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.SQR,yyline,yycolumn);}
+"TAN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.TAN,yyline,yycolumn);}
+"="					{this.tokensList.add("igual");  return new Symbol(Analizador_SintacticoSym.IGUAL,yyline,yycolumn);}
+"+"					{this.tokensList.add("mas");    return new Symbol(Analizador_SintacticoSym.MAS,yyline,yycolumn);}
+"-"					{this.tokensList.add("menos");  return new Symbol(Analizador_SintacticoSym.MENOS,yyline,yycolumn);}
+"*"					{this.tokensList.add("mul");    return new Symbol(Analizador_SintacticoSym.MUL,yyline,yycolumn);}
+"("					{this.tokensList.add("PARENTESIS_IZQ");return new Symbol(Analizador_SintacticoSym.PARENTESIS_IZQ,yyline,yycolumn);}
+")"					{this.tokensList.add("PARENTESIS_DER");return new Symbol(Analizador_SintacticoSym.PARENTESIS_DER,yyline,yycolumn);}
+{Digito}			{this.tokensList.add("ent(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.ENTERO,yyline,yycolumn, yytext());}
+{id_cadena}			{this.tokensList.add("ide(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.IDE,yyline,yycolumn, yytext());}
+{id_numerico}		{this.tokensList.add("ide(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.IDE,yyline,yycolumn, yytext());}
+{Identificador} 	{this.tokensList.add("id("+yytext()+")");      return new Symbol(Analizador_SintacticoSym.ID,yyline,yycolumn, yytext());}
+{Cad_REM} 			{this.tokensList.add("CADENA REM: "+yytext()); return new Symbol(Analizador_SintacticoSym.REM,yyline,yycolumn, yytext());}
+{Cad_Delimitada}	{
+						this.tokensList.add("const(" + yytext().substring(1,yytext().length()-1) + ")");
+						return new Symbol(Analizador_SintacticoSym.CONSTANTE,yyline,yycolumn, yytext().substring(1,yytext().length()-1)); 
+					}
+{CRLF}				{this.tokensList.add("CRLF"); return new Symbol(Analizador_SintacticoSym.CRLF,yyline,yycolumn);}
+{CR}				{this.tokensList.add("CR");   return new Symbol(Analizador_SintacticoSym.CR,yyline,yycolumn);}
+{LF}				{this.tokensList.add("LF");   return new Symbol(Analizador_SintacticoSym.LF,yyline,yycolumn);}
+{PUNTOYCOMA} 		{
+ 						this.tokensList.add("PUNTOYCOMA");
+ 						return new Symbol(Analizador_SintacticoSym.PUNTOYCOMA,yyline,yycolumn); 
+ 					}
+{constante}			{
+						this.tokensList.add("const(" + yytext().substring(1)+ ")");
+						return new Symbol(Analizador_SintacticoSym.CONSTANTE_NUM,yyline,yycolumn, yytext().substring(1));
+					}
 
-{ERROR} 	  		{System.out.println("Error lexico en linea " + (yyline+1) +  ": " + yytext() );}
+{ERROR} 	  		{System.err.println("Error lexico en linea " + (yyline+1) +  ": " + yytext() );System.out.println();err++;}
 
-<<EOF>>         {this.writeOutputFile(); System.exit(0);  /* Código ejecutado cuando se encuentra EOF */}  
+<<EOF>>         {this.writeOutputFile(); return new Symbol(Analizador_SintacticoSym.EOF,yyline,yycolumn);}  
 .               {/* Regla léxica para evitar estrellarse cuando se encuentra algo extraño, no hacemos nada tampoco */}  

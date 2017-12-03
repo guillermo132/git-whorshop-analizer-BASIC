@@ -15,11 +15,11 @@ parser code
 	   }
 	  if(extension.equals(".bash")){
 	     	FileInputStream basic =new FileInputStream(programa);
-	     	Yylex y=new Yylex(basic);
-	   		PeclCup principal=new PeclCup(y);
-	   		principal.parse();
+	     	Analizador_LexicoLex y=new Analizador_LexicoLex(basic);
+	   		Analizador_SintacticoCup principal=new Analizador_SintacticoCup(y);
 	   		System.out.println("ANALIZADOR LEXICO");
-	   		System.out.println(y.writeOutputFile());
+	   		y.writeOutputFile();
+	   		principal.parse();
 	   		System.out.println("\nNumero de errorres lexicos: "+ y.getErr()+"\n");
 	   		
 	  }
@@ -46,11 +46,26 @@ parser code
 action code
 {:
 :}
+terminal String		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RND, READ, 
+					REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, DIVISION, POTENCIA,
+					CONSTANTE, CRLF, CR, LF, PUNTOYCOMA, ENTERO, LOG, TAN, ABS, EXP, ATN, SQR, SGN, COS, INT,
+					CONSTANTE_NUM, PARENTESIS_IZQ, PARENTESIS_DER, ID;
 
+non terminal	inicio, programa, leerLinea;
+
+start with inicio;
+
+inicio          ::= programa {::};
+
+programa		::= ENTERO:e leerLinea;
+
+
+
+/*
 terminal String		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE, READ, 
 					REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, DIVISION, POTENCIA,
 					CONSTANTE, CRLF, CR, LF, PUNTOYCOMA, ENTERO;
-terminal 		 	ID;
+terminal String	 	ID;
 
 non terminal	inicio, programa, variables, variable, var, expresion, enum, sentencias, asignacion, tipo, tipoBool, comp, comparacion, mas, otra;
 non terminal    logica, exLogicas, tLogica, if, for, operacion, operaciones, operando, operador, conSigno, numero, parentExLogica, operadorParent;
@@ -84,4 +99,5 @@ variable        ::=VAR enum DOS_PUNTOS var:variable PUNTO_COMA
 				 | error 
 				 	{:
 				 		numErr++;
-				 	:};
+				 	:};*/
+				 	
