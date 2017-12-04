@@ -45,18 +45,24 @@ parser code
 
 action code
 {:
+	int numErr=0;
+	int numErrS=0;
 :}
 terminal		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RND, READ, 
-				REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, IDE_NUM, DIVISION, POTENCIA,
-				CRLF, CR, LF, PUNTOYCOMA, LOG, TAN, ABS, EXP, ATN, SQR, SGN, COS, INT,
-				CONSTANTE_NUM, PARENTESIS_IZQ, PARENTESIS_DER, ID, RANDOMIZE, FUNCION;
+				REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, IDE_NUM, DIVISION, 
+				POTENCIA, CRLF, CR, LF, PUNTOYCOMA, FUNCION_MAT, PARENTESIS_IZQ, PARENTESIS_DER, ID, 
+				RANDOMIZE, FUNCION, EXPONENTE;
 				
 terminal String CONSTANTE;
 
-terminal     	ENTERO;
+terminal     	ENTERO, CONSTANTE_NUM;
 
-non terminal	inicio, programa, leerLinea, funcion, expresion, parametro, operacion, operador, operadorParent, opcion2, operando, opcion;
-non terminal	numero, conSigno;
+non terminal	inicio, programa, leerLinea, expresion, operacion, operador, operadorParent, opcion2, operando, opcion;
+non terminal	operaciones;
+
+precedence right MAS, MENOS;
+precedence right MUL, DIVISION,EXPONENTE;
+
 //Gramatica 
 start with inicio;
 
@@ -67,42 +73,35 @@ programa		::= ENTERO:e leerLinea
 								System.out.println(e.toString());
 							:};
 							
-leerLinea		::=  DEF funcion
+leerLinea		::=  DEF expresion
 					|INPUT CONSTANTE PUNTOYCOMA IDE CRLF{:
 														System.out.println("INPUT");
 													:};
-funcion			::= FUNCION IGUAL expresion{::};
+expresion		::= FUNCION IGUAL operacion{:/* aï¿½adeExpresion();*/:};
 
-expresion		::= operacion{:/* añadeExpresion();*/:};
+operacion       ::= opcion:o {:  :}
+					| error opcion ;
 
-operacion       ::= IDE:id ASIGNACION:as opcion:o {: compruebaIntAsig(id, idleft+1); inicializar(id); aux = new NodoIntermedio(id.toString()); aux.añadirHijo(aux3); :}
-                  | error opcion   ;
+opcion          ::= operaciones {: :}
+					| PARENTESIS_IZQ operaciones PARENTESIS_DER {: :};
 
-operaciones		::= operador:o operando:op operadorParent:opa opcion2:o2 
-						{:
-							String s=o+""+op+""+opa+""+o2; RESULT=s;
-						:}
-				  | operando:o1 operador:o operando:o2 operadorParent:opa opcion2:op2 {:String s=o1+""+o+""+o2+""+opa+""+o2; RESULT=s;:}
-				  | error{:numErr++;:};
-				  
-opcion          ::= operaciones {::}
-                  | PARENTESIS_IZQ operacion PARENTESIS_DER {: :};
+operaciones     ::= operador:o operando:op operadorParent:opa opcion2:o2 {:String s=o+""+op+""+opa+""+o2; RESULT=s;:}
+					| operando:o1 operador:o operando:o2 operadorParent:opa opcion2:op2 {:String s=o1+""+o+""+o2+""+opa+""+o2; RESULT=s;:}
+					| error{:numErr++;:};
+
 opcion2         ::= opcion:o {:RESULT=o;:} | {:RESULT="";:} ;
 
-operando        ::= IDE:id {:/*compruebaInt(id, idleft+1);*/ RESULT=id.toString();:}
-                  | numero:n {:RESULT=n.toString();:}   ; 
-                  
-operadorParent  ::= operador:o {:RESULT=o;:}
-				   | {:RESULT="";:};
-				   
-operador        ::= MAS {:RESULT="+";:}
-                  | MENOS {:RESULT="-";:}
-                  | DIVISION {:RESULT="/";:}
-                  | MUL {:RESULT="*";:};
-                  
-conSigno        ::= MAS CONSTANTE_NUM:n {:RESULT="+"+n.toString();:}| MENOS CONSTANTE_NUM:n {:RESULT="-"+n.toString();:};
+operando        ::= CONSTANTE_NUM:id {:/*compruebaInt(id, idleft+1);*/ RESULT=id.toString();:}
+					| IDE_NUM:id {:/*compruebaInt(id, idleft+1);*/ RESULT=id.toString();:}; 
 
-numero          ::= conSigno {::} | ENTERO:n {: RESULT=n;:} | CONSTANTE_NUM:n{: RESULT=n:};
+operadorParent  ::= operador:o {:RESULT=o;:}
+					 | {:RESULT="";:};
+					 
+operador        ::= MAS {:RESULT="+";:}
+					| MENOS {:RESULT="-";:}
+					| DIVISION {:RESULT="/";:}
+					| MUL {:RESULT="*";:}
+					| EXPONENTE {:RESULT="^";:};
 				   
 /* 
 					 DATA {::} 
@@ -138,15 +137,6 @@ numero          ::= conSigno {::} | ENTERO:n {: RESULT=n;:} | CONSTANTE_NUM:n{: 
 					;
 					*/
 					
-					
-					
-					
-					
-					
-					
-					
-
-
 
 /*
 terminal String		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE, READ, 

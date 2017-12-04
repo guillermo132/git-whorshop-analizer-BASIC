@@ -32,7 +32,7 @@ import java.util.ArrayList;
 	}
 	//private static ArrayList<String> errorList = new ArrayList<String>();
 	 
-	/* Método de escribir en el fichero de salida y por pantalla*/
+	/* Mï¿½todo de escribir en el fichero de salida y por pantalla*/
 	public void writeOutputFile() throws IOException {
 		String filename = "file.out";
 		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
@@ -78,15 +78,17 @@ Cad_Delimitada=\"{Car_Cad_Delimitado}*\"
 
 LF	= 	\n
 CR	=	\r
-//EOF = "eof"
+
 CRLF={CR}{LF}
 Numero_Real      =   {Digito}\.{Digito}
 expresion_num  =  (\+|\-)?([0-9]|{Digito}|{Numero_Real}|({Digito}|{Numero_Real})\^(\+|\-)?{Digito}) 
 constante = " "{expresion_num}
-id_numerico ={Letra} "(" {Car_Cadena_Simple}{1,2}")"
+id_numerico ={Letra} "(" {Car_Cadena_Simple} (","{Car_Cadena_Simple})*")"
 id_cadena = {Letra}"$"
 Identificador = {Digito} | {Letra}
 funcion = FN{Letra} | FN{Letra}" ""("{Letra}")"
+
+funcionMat = "ABS" | "ATN" | "COS" | "EXP" | "INT" | "LOG" | "RND" | "SGN" | "SQR" | "TAN";
 
 %state estadoNumero
 
@@ -114,20 +116,13 @@ funcion = FN{Letra} | FN{Letra}" ""("{Letra}")"
 "STOP" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.STOP,yyline,yycolumn);}
 "THEN" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.THEN,yyline,yycolumn);}
 "TO" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.TO,yyline,yycolumn);}
-"ABS"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ABS,yyline,yycolumn);}
-"ATN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ATN,yyline,yycolumn);} 
-"COS"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.COS,yyline,yycolumn);}
-"EXP"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.EXP,yyline,yycolumn);}
-"INT"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.INT,yyline,yycolumn);}
-"LOG"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.LOG,yyline,yycolumn);}
-"RND"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RND,yyline,yycolumn);}
-"SGN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.SGN,yyline,yycolumn);} 
-"SQR"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.SQR,yyline,yycolumn);}
-"TAN"				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.TAN,yyline,yycolumn);}
+{funcionMat}		{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.FUNCION_MAT,yyline,yycolumn, yytext());}
 "="					{this.tokensList.add("igual");  return new Symbol(Analizador_SintacticoSym.IGUAL,yyline,yycolumn);}
 "+"					{this.tokensList.add("mas");    return new Symbol(Analizador_SintacticoSym.MAS,yyline,yycolumn);}
 "-"					{this.tokensList.add("menos");  return new Symbol(Analizador_SintacticoSym.MENOS,yyline,yycolumn);}
 "*"					{this.tokensList.add("mul");    return new Symbol(Analizador_SintacticoSym.MUL,yyline,yycolumn);}
+"/"					{this.tokensList.add("div");    return new Symbol(Analizador_SintacticoSym.DIVISION,yyline,yycolumn);}
+"^"					{this.tokensList.add("exp");    return new Symbol(Analizador_SintacticoSym.EXPONENTE,yyline,yycolumn);}
 "("					{this.tokensList.add("PARENTESIS_IZQ");return new Symbol(Analizador_SintacticoSym.PARENTESIS_IZQ,yyline,yycolumn);}
 ")"					{this.tokensList.add("PARENTESIS_DER");return new Symbol(Analizador_SintacticoSym.PARENTESIS_DER,yyline,yycolumn);}
 {Digito}			{this.tokensList.add("ent(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.ENTERO,yyline,yycolumn, yytext());}
@@ -158,4 +153,4 @@ funcion = FN{Letra} | FN{Letra}" ""("{Letra}")"
 {ERROR} 	  		{System.err.println("Error lexico en linea " + (yyline+1) +  ": " + yytext() );System.out.println();err++;}
 
 <<EOF>>         {this.writeOutputFile(); return new Symbol(Analizador_SintacticoSym.EOF,yyline,yycolumn);}  
-.               {/* Regla léxica para evitar estrellarse cuando se encuentra algo extraño, no hacemos nada tampoco */}  
+.               {/* Regla lï¿½xica para evitar estrellarse cuando se encuentra algo extraï¿½o, no hacemos nada tampoco */}  
