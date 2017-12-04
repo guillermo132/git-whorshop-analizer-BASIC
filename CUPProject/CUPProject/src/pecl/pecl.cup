@@ -449,8 +449,10 @@ if              ::= IF parentExLogica THEN sentencias END IF {:aux=new NodoInter
 				  | IF parentExLogica THEN else ELSE sentencias END IF {:aux=new NodoIntermedio("IF-ELSE"); aux.añadirHijo(aux4); :};
 else            ::= sentencias;  
 while           ::= WHILE parentExLogica DO sentencias END WHILE  {:aux=new NodoIntermedio("IF"); aux.añadirHijo(aux4); ifwhile=false; :};
+
 operacion       ::= IDE:id ASIGNACION:as opcion:o {: compruebaIntAsig(id, idleft+1); inicializar(id); aux = new NodoIntermedio(id.toString()); aux.añadirHijo(aux3); :}
                   | error opcion   ;
+                  
 opcion          ::= operaciones {:aux3=new NodoIntermedio("NO_PARENT"); aux3.añadirHijo(aux2); :}
                   | PARENT_IZQ operaciones PARENT_DER {:aux3=new NodoIntermedio("PARENT"); aux3.añadirHijo(aux2); :};
 operaciones     ::= operador:o operando:op operadorParent:opa opcion2:o2 {:aux2 = new NodoHoja("op",o+""+op+""+opa+""+o2);String s=o+""+op+""+opa+""+o2; RESULT=s;:}
@@ -471,7 +473,7 @@ skip            ::= SKIP:id {:aux=new NodoHoja("","");:} ;
 read            ::= READ IDE:id {:compruebaInt(id, idleft+1);  aux=new NodoHoja("IDE",id.toString()); :} ;
 write           ::= WRITE IDE:id {: compruebaIntBool(id, idleft+1);  aux=new NodoHoja("IDE",id.toString()); :}
 				  | WRITE opcion {:aux=new NodoIntermedio("Operation"); aux.añadirHijo(aux3); :};
-expresion2      ::= skip {: aux1=new NodoIntermedio("skip"); aux1.añadirHijo(aux); añadeExpresion();:} 
+expresion2      ::= skip {: aux1=new NodoIntermedio("skip"); aux1 	.añadirHijo(aux); añadeExpresion();:} 
 				  | read {: aux1=new NodoIntermedio("read");  aux1.añadirHijo(aux); añadeExpresion();:}
 				  | write{: aux1=new NodoIntermedio("write"); aux1.añadirHijo(aux); añadeExpresion();:}
 				  | error{:numErr++;:} ;

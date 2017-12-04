@@ -86,6 +86,7 @@ constante = " "{expresion_num}
 id_numerico ={Letra} "(" {Car_Cadena_Simple}{1,2}")"
 id_cadena = {Letra}"$"
 Identificador = {Digito} | {Letra}
+funcion = FN{Letra} | FN{Letra}" ""("{Letra}")"
 
 %state estadoNumero
 
@@ -104,7 +105,7 @@ Identificador = {Digito} | {Letra}
 "NEXT" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.NEXT,yyline,yycolumn);}
 "ON" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.ON,yyline,yycolumn);}
 "PRINT" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.PRINT,yyline,yycolumn);}
-//"RANDOMIZE" 		{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RANDOMIZE,yyline,yycolumn);}
+"RANDOMIZE" 		{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RANDOMIZE,yyline,yycolumn);}
 "READ" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.READ,yyline,yycolumn);}
 "REM" 				{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.REM,yyline,yycolumn);}
 "RESTORE" 			{this.tokensList.add(yytext()); return new Symbol(Analizador_SintacticoSym.RESTORE,yyline,yycolumn);}
@@ -131,7 +132,7 @@ Identificador = {Digito} | {Letra}
 ")"					{this.tokensList.add("PARENTESIS_DER");return new Symbol(Analizador_SintacticoSym.PARENTESIS_DER,yyline,yycolumn);}
 {Digito}			{this.tokensList.add("ent(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.ENTERO,yyline,yycolumn, yytext());}
 {id_cadena}			{this.tokensList.add("ide(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.IDE,yyline,yycolumn, yytext());}
-{id_numerico}		{this.tokensList.add("ide(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.IDE,yyline,yycolumn, yytext());}
+{id_numerico}		{this.tokensList.add("ide(" + yytext() + ")"); return new Symbol(Analizador_SintacticoSym.IDE_NUM,yyline,yycolumn, yytext());}
 {Identificador} 	{this.tokensList.add("id("+yytext()+")");      return new Symbol(Analizador_SintacticoSym.ID,yyline,yycolumn, yytext());}
 {Cad_REM} 			{this.tokensList.add("CADENA REM: "+yytext()); return new Symbol(Analizador_SintacticoSym.REM,yyline,yycolumn, yytext());}
 {Cad_Delimitada}	{
@@ -148,6 +149,10 @@ Identificador = {Digito} | {Letra}
 {constante}			{
 						this.tokensList.add("const(" + yytext().substring(1)+ ")");
 						return new Symbol(Analizador_SintacticoSym.CONSTANTE_NUM,yyline,yycolumn, yytext().substring(1));
+					}
+					
+{funcion}			{	this.tokensList.add(yytext());
+ 						return new Symbol(Analizador_SintacticoSym.FUNCION,yyline,yycolumn, yytext()); 
 					}
 
 {ERROR} 	  		{System.err.println("Error lexico en linea " + (yyline+1) +  ": " + yytext() );System.out.println();err++;}

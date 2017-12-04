@@ -1,12 +1,2 @@
 [ent(10),INPUT,const(Cual es tu nombre?),PUNTOYCOMA,ide(U$),CRLF,
-ent(20),PRINT,const(Hola ),PUNTOYCOMA,ide(U$),CRLF,
-ent(30),INPUT,const(Cuantas estrellas quieres?),PUNTOYCOMA,id(N),CRLF,
-ent(40),LET,ide(S$),igual,const(),CRLF,
-ent(50),FOR,id(I),igual,const(1),TO,id(N),CRLF,
-ent(60),LET,ide(S$),igual,ide(S$),mas,const(*),CRLF,
-ent(70),NEXT,id(I),CRLF,
-ent(80),PRINT,ide(S$),CRLF,
-ent(90),INPUT,const(Quieres mas estrellas?),PUNTOYCOMA,ide(A$),CRLF,
-ent(120),IF,ide(A$),igual,const(S),THEN,GOTO,const(30),CRLF,
-ent(130),PRINT,const(Adios !! ),PUNTOYCOMA,ide(U$),CRLF,
-ent(140),END,EOF]
+EOF]

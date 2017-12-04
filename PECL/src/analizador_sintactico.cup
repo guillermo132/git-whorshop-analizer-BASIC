@@ -10,21 +10,21 @@ parser code
 	   String extension="";
 	   String programa=argc[0]; 
 	   
-	   for (int i=programa.length()-5;i<programa.length();i++){
+	   for (int i=programa.length()-4;i<programa.length();i++){
 	   		extension=extension+programa.charAt(i);
 	   }
-	  if(extension.equals(".bash")){
+	  if(extension.equals(".bas")){
 	     	FileInputStream basic =new FileInputStream(programa);
 	     	Analizador_LexicoLex y=new Analizador_LexicoLex(basic);
 	   		Analizador_SintacticoCup principal=new Analizador_SintacticoCup(y);
+	   		principal.parse();
 	   		System.out.println("ANALIZADOR LEXICO");
 	   		y.writeOutputFile();
-	   		principal.parse();
 	   		System.out.println("\nNumero de errorres lexicos: "+ y.getErr()+"\n");
 	   		
 	  }
 	  else{
-	  	System.err.println("ERROR. EL ARCHIVO DEBE DE SER .bash");
+	  	System.err.println("ERROR. EL ARCHIVO DEBE DE SER .bas");
 	  }
 	}  
 	public void syntax_error(Symbol s) {
@@ -46,18 +46,105 @@ parser code
 action code
 {:
 :}
-terminal String		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RND, READ, 
-					REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, DIVISION, POTENCIA,
-					CONSTANTE, CRLF, CR, LF, PUNTOYCOMA, ENTERO, LOG, TAN, ABS, EXP, ATN, SQR, SGN, COS, INT,
-					CONSTANTE_NUM, PARENTESIS_IZQ, PARENTESIS_DER, ID;
+terminal		DATA, DEF, DIM, END, FOR, GO, GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RND, READ, 
+				REM, RESTORE, RETURN, STEP, STOP, THEN, TO, IGUAL, MAS, MENOS, MUL, IDE, IDE_NUM, DIVISION, POTENCIA,
+				CRLF, CR, LF, PUNTOYCOMA, LOG, TAN, ABS, EXP, ATN, SQR, SGN, COS, INT,
+				CONSTANTE_NUM, PARENTESIS_IZQ, PARENTESIS_DER, ID, RANDOMIZE, FUNCION;
+				
+terminal String CONSTANTE;
 
-non terminal	inicio, programa, leerLinea;
+terminal     	ENTERO;
 
+non terminal	inicio, programa, leerLinea, funcion, expresion, parametro, operacion, operador, operadorParent, opcion2, operando, opcion;
+non terminal	numero, conSigno;
+//Gramatica 
 start with inicio;
 
-inicio          ::= programa {::};
+inicio          ::= programa | programa inicio;
 
-programa		::= ENTERO:e leerLinea;
+programa		::= ENTERO:e leerLinea
+							{: 
+								System.out.println(e.toString());
+							:};
+							
+leerLinea		::=  DEF funcion
+					|INPUT CONSTANTE PUNTOYCOMA IDE CRLF{:
+														System.out.println("INPUT");
+													:};
+funcion			::= FUNCION IGUAL expresion{::};
+
+expresion		::= operacion{:/* añadeExpresion();*/:};
+
+operacion       ::= IDE:id ASIGNACION:as opcion:o {: compruebaIntAsig(id, idleft+1); inicializar(id); aux = new NodoIntermedio(id.toString()); aux.añadirHijo(aux3); :}
+                  | error opcion   ;
+
+operaciones		::= operador:o operando:op operadorParent:opa opcion2:o2 
+						{:
+							String s=o+""+op+""+opa+""+o2; RESULT=s;
+						:}
+				  | operando:o1 operador:o operando:o2 operadorParent:opa opcion2:op2 {:String s=o1+""+o+""+o2+""+opa+""+o2; RESULT=s;:}
+				  | error{:numErr++;:};
+				  
+opcion          ::= operaciones {::}
+                  | PARENTESIS_IZQ operacion PARENTESIS_DER {: :};
+opcion2         ::= opcion:o {:RESULT=o;:} | {:RESULT="";:} ;
+
+operando        ::= IDE:id {:/*compruebaInt(id, idleft+1);*/ RESULT=id.toString();:}
+                  | numero:n {:RESULT=n.toString();:}   ; 
+                  
+operadorParent  ::= operador:o {:RESULT=o;:}
+				   | {:RESULT="";:};
+				   
+operador        ::= MAS {:RESULT="+";:}
+                  | MENOS {:RESULT="-";:}
+                  | DIVISION {:RESULT="/";:}
+                  | MUL {:RESULT="*";:};
+                  
+conSigno        ::= MAS CONSTANTE_NUM:n {:RESULT="+"+n.toString();:}| MENOS CONSTANTE_NUM:n {:RESULT="-"+n.toString();:};
+
+numero          ::= conSigno {::} | ENTERO:n {: RESULT=n;:} | CONSTANTE_NUM:n{: RESULT=n:};
+				   
+/* 
+					 DATA {::} 
+					| DEF {::} 
+					| DIM {::} 
+					| FOR {::} 
+					| GO {::} 
+					| GOSUB {::} 
+					| GOTO {::} 
+					| IF {::} 
+					| 
+					| LET {::} 
+					| NEXT {::} 
+					| ON {::} 
+					| PRINT {::}
+					| RND {::}
+					| READ {::}
+					| REM {::}
+					| RESTORE {::}
+					| RETURN {::}
+					| STEP {::}
+					| STOP {::}
+					| THEN {::}
+					| TO {::}
+					| IDE {::}
+					| CONSTANTE:e {:System.out.println(e.toString());:}
+					| CRLF {::}
+					| CR {::}
+					| LF {::}
+					| PUNTOYCOMA {::}
+					| CONSTANTE_NUM {::}
+					| ID {::}
+					;
+					*/
+					
+					
+					
+					
+					
+					
+					
+					
 
 
 
