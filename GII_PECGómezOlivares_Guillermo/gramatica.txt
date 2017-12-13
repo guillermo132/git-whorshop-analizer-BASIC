@@ -1,0 +1,30 @@
+//################ NODOS TERMINALES ##################
+
+//PALABRAS RESERVADAS
+	data, def, dim, end, for, go, gosub, goto, if, input, let, next, on, print, rnd, read, 
+	rem, restore, return, step, stop, then, to, randomize, funcion,
+//OPERACIONES DE ASIGNACION
+	igual
+//IDENTIFICADORES
+
+	id_cadena, id_num_sus,id_num
+
+//CONSTANTES
+	constante, entero, constante_num
+
+//OPERADORES
+	division,, mas, menos, mul, exponente,
+//SIGNOS DE PUNTUACION
+	puntoycoma, coma, parentesis_izq, parentesis_der,
+//OPERACIONES MATEMATICAS
+	funcion_mat, 
+//SALTO DE LINEA
+	crlf
+//OPERADORES DE COMPARACION
+	menor, mayor, mayor_igual, menor_igual, distinto
+
+//############## NODOS NO TERMINALES ################
+
+non terminal STRING	INICIO,PROGRAMA, LEERLINEA, EXPRESION, OPERACION, OPERADOR, OPERADORPARENT, OPCION2, IMPRIMIR;
+non terminal STRING	OPERACIONES, FUNCIONMAT, VARIABLE, ASIGNACION, DECLARACION, IF_THEN,OPERANDO, OPCION;
+non terminal STRING GOTO, COMPARACION, ON_GOTO, MULTIPLE_GOTO, GOSUB_RETURN, INICIOLINEA, METE_ENTERO,PRINT, ITEM, NEXTITEM, DATA, DATA_VAR, INPUT_VAR, INPUT, READ, READ_VAR, MORE_READ, FOR_TO, VARIABLE_NUM, LIMIT_FOR, IGUALLET, VARIABLE_IF, TO_GO;

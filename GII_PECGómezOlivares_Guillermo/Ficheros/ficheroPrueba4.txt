@@ -1,7 +1,7 @@
 10 INPUT "Cual es tu nombre?"; U$
 20 PRINT "Hola "; U$
 30 INPUT "Cuantas estrellas quieres?"; N
-40 LET S$ = ""
+40 LET S$ = "Como te va?"
 50 FOR I = 1 TO N
 60 LET S$ = S$ + "*"
 70 NEXT (I)
